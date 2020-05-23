@@ -11,7 +11,7 @@ namespace GITT_Analysis
 
         public decimal GlobalMaximum { get; set; }
 
-        public decimal Threshold { get; set; } = 0.05m;//0.001m 6633 OVERVEJ OM DER SKAL RODES MED THRESHHOLD. TÆL HVOR MANGE TOPPER DER BURDE VÆRE I FORHOLD TIL HVAD DEN FINDER.
+        public decimal Threshold { get; set; } = 0.001m;//0.001m 6633 OVERVEJ OM DER SKAL RODES MED THRESHHOLD. TÆL HVOR MANGE TOPPER DER BURDE VÆRE I FORHOLD TIL HVAD DEN FINDER.
 
         public decimal HighestLocalMinimaAfterReverseSecondHalf { get; set; }
 
@@ -30,6 +30,9 @@ namespace GITT_Analysis
             findGlobalMinimum();
             //2. Analyse data untill global minimum
             analyseDischarge();
+            //3. Analyse charge
+            analyseCharge();
+            Debug.WriteLine("End of file");
 
 
             //Tidligere
@@ -61,7 +64,7 @@ namespace GITT_Analysis
             Direction direction = DetectDirection();
             //trackers
             bool firstMeasurement = true;
-            decimal lastPotential = 10;//The potential will always be less then 10 V.
+            decimal lastPotential = 10;//The potential will always be less than 10 V.
             decimal lastTime = 0;
             decimal localMaximum = 0;
             decimal localMinimum = 0;
@@ -76,6 +79,7 @@ namespace GITT_Analysis
 
             decimal line_counter = 0;
             decimal object_counter = 0;
+            decimal minimum_counter = 0;
             bool globalMinimumReached = false;
 
             //TJEK OM TALLENE PASSER ELLER OM DER SKAL LAVES EKSTRA TJEK/JUSTERINGER. HVIS ALT ER GODT, LAV LOGIK FOR GLOBALMAXIMUMREACHED = TRUE
@@ -114,18 +118,24 @@ namespace GITT_Analysis
                             localMinimum = measurement.Potential;
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
-                            continue;
                         }
                         if(measurement.Potential > lastPotential)//local minimum is detected (previous measurement was minimum)
                         {
                             //Collecting data
                             et_final = lastPotential;
                             t_final = lastTime;
+                            Debug.WriteLine("Difference " + differenceFromLastMeasurement);
+                            minimum_counter++;
+                            Debug.WriteLine("Minimum detected " + minimum_counter);
                             //Preparing for search of local maximum
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
                             direction = Direction.Up;
-                            continue;
+                        }
+                        if (globalMinimumReached == true)
+                        {
+                            Debug.WriteLine("I'm at the bottom of the ocean");
+                            break;
                         }
                     }
                     //detect local maximum
@@ -156,6 +166,7 @@ namespace GITT_Analysis
                             //prep for next iteration
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
+                            direction = Direction.Down;
                             continue;
                         }
                     }
@@ -163,6 +174,127 @@ namespace GITT_Analysis
             }
         }
 
+        //should be run after analyseDischarge()
+        private void analyseCharge()
+        {
+            Direction direction = Direction.Up;
+            //trackers
+            bool firstMeasurement = true;
+            decimal lastPotential = -10;//The potential will always be greater than 10 V.
+            decimal lastTime = 0;
+            decimal localMaximum = 0;
+            decimal localMinimum = 0;
+
+            //data needed for object
+            decimal t_initial = 0;
+            decimal t_final = 0;
+            decimal es_initial = 0;
+            decimal es_final = 0;
+            decimal et_initial = 0;
+            decimal et_final = 0;
+
+            decimal line_counter = 0;
+            decimal object_counter = 0;
+            decimal minimum_counter = 0;
+            bool globalMinimumReached = false;
+            bool firstMaxReached = false;
+            bool firstMinReached = false;
+
+            //TJEK OM TALLENE PASSER ELLER OM DER SKAL LAVES EKSTRA TJEK/JUSTERINGER. HVIS ALT ER GODT, LAV LOGIK FOR GLOBALMAXIMUMREACHED = TRUE
+
+            List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>(); //liste med enkelt-talt til udregninger  
+
+            //from global minimum to end
+            foreach (var measurement in Measurements)
+            {
+                if (measurement.Potential != GlobalMinimum && globalMinimumReached == false)
+                {
+                    continue;
+                }
+                if (measurement.Potential == GlobalMinimum)
+                {
+                    globalMinimumReached = true;
+                    
+                }
+                if (globalMinimumReached == true)
+                {
+                    decimal differenceFromLastMeasurement = Math.Abs(decimal.Subtract(lastPotential, measurement.Potential));
+
+                    if (differenceFromLastMeasurement > Threshold)
+                    {
+                        //searching for first local maximum after global minimum, data is discarded
+                        if(direction == Direction.Up && measurement.Potential > lastPotential && firstMaxReached == false)//if current is bigger than last, first max not reached.
+                        {
+                            lastPotential = measurement.Potential;
+                            lastTime = measurement.Time;
+                            continue;
+                        }
+                        if(direction == Direction.Up && measurement.Potential < lastPotential && firstMaxReached == false)//first max is reached, and "skipped"
+                        {
+                            direction = Direction.Down;
+                            firstMaxReached = true;
+                            lastPotential = measurement.Potential;
+                            lastTime = measurement.Time;
+                            Debug.WriteLine("Found local maximum ");
+                            continue;
+                        }
+                        
+                        //searching for local minimum after global minimum, data is collected
+                        if (direction == Direction.Down && measurement.Potential < lastPotential && firstMaxReached == true)//if current potential is smaller than last, min not reached
+                        {
+                            lastPotential = measurement.Potential;
+                            lastTime = measurement.Time;
+                            continue;
+                        }
+                        if (direction == Direction.Down && measurement.Potential > lastPotential && firstMaxReached == true)//if current potenial is greater than last, min reached.
+                        {
+                            if (firstMinReached == true)//if it is not first min.
+                            {
+                                es_final = lastPotential;
+                                diffMeasurements.Add(new DiffMeasurement(es_initial, es_final, et_initial, et_final, t_initial, t_final));
+                                object_counter++;
+                                Debug.WriteLine("Just created an object 2 " + object_counter);
+                            }
+                            
+                            //collect data
+                            es_initial = lastPotential;
+                            et_initial = measurement.Potential;
+                            t_initial = measurement.Time;
+
+                            //prepare next iteration
+                            lastPotential = measurement.Potential;
+                            lastTime = measurement.Time;
+                            direction = Direction.Up;
+                            Debug.WriteLine("Found local minimum ");
+                            firstMinReached = true;
+                            continue;
+                        }
+                        if (direction == Direction.Up && measurement.Potential > lastPotential && firstMaxReached == true) //max not reached, continue.
+                        {
+                            lastPotential = measurement.Potential;
+                            lastTime = measurement.Time;
+                            continue;
+                        }
+                        if (direction == Direction.Up && measurement.Potential < lastPotential && firstMaxReached == true) //max reached, collect data.
+                        {
+                            //collect data
+                            et_final = lastPotential;
+                            t_final = lastTime;
+
+                            //prepare for next iteration
+                            lastPotential = measurement.Potential;
+                            lastTime = measurement.Time;
+                            direction = Direction.Down;
+                        }
+
+                    }
+
+                }
+
+                
+
+            }
+        }
 
         //oprindelig, starter med "up", men opsamler forkert data.
         private void findLocalMaximum()
