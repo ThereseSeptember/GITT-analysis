@@ -124,9 +124,9 @@ namespace GITT_Analysis
                             //Collecting data
                             et_final = lastPotential;
                             t_final = lastTime;
-                            Debug.WriteLine("Difference " + differenceFromLastMeasurement);
+                            //Debug.WriteLine("Difference " + differenceFromLastMeasurement);
                             minimum_counter++;
-                            Debug.WriteLine("Minimum detected " + minimum_counter);
+                            //Debug.WriteLine("Minimum detected " + minimum_counter);
                             //Preparing for search of local maximum
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
@@ -158,11 +158,15 @@ namespace GITT_Analysis
                             diffMeasurements.Add(new DiffMeasurement(es_initial, es_final, et_initial, et_final, t_initial, t_final));
                             object_counter++;
                             Debug.WriteLine("Just created an object " + object_counter);
+                            Decimal value = Decimal.Subtract(t_final, t_initial);
+                            //Decimal value_test = Decimal.Subtract(2m, 1m);
+                            Debug.WriteLine("time differece " + value);
+                            //Debug.WriteLine("test difference" + value_test);
 
                             //prep for next collection of Gitt data
                             es_initial = lastPotential;
                             et_initial = measurement.Potential;
-                            t_initial = measurement.Potential;
+                            t_initial = measurement.Time;
                             //prep for next iteration
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
@@ -254,6 +258,8 @@ namespace GITT_Analysis
                                 diffMeasurements.Add(new DiffMeasurement(es_initial, es_final, et_initial, et_final, t_initial, t_final));
                                 object_counter++;
                                 Debug.WriteLine("Just created an object 2 " + object_counter);
+                                Decimal value = Decimal.Subtract(t_final, t_initial);
+                                Debug.WriteLine("time differece " + value);
                             }
                             
                             //collect data
