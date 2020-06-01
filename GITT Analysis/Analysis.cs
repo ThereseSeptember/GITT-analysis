@@ -11,7 +11,7 @@ namespace GITT_Analysis
 
         public decimal GlobalMaximum { get; set; }
 
-        public decimal Threshold { get; set; } = 0.001m;//0.001m 6633 OVERVEJ OM DER SKAL RODES MED THRESHHOLD. TÆL HVOR MANGE TOPPER DER BURDE VÆRE I FORHOLD TIL HVAD DEN FINDER.
+        public decimal Threshold { get; set; } = 0.0018m;//0.001m 6633 OVERVEJ OM DER SKAL RODES MED THRESHHOLD. TÆL HVOR MANGE TOPPER DER BURDE VÆRE I FORHOLD TIL HVAD DEN FINDER.
 
         public decimal HighestLocalMinimaAfterReverseSecondHalf { get; set; }
 
@@ -159,8 +159,10 @@ namespace GITT_Analysis
                             object_counter++;
                             Debug.WriteLine("Just created an object " + object_counter);
                             Decimal value = Decimal.Subtract(t_final, t_initial);
+                            Debug.WriteLine("Potential at local maximum " + lastPotential);
+                            Debug.WriteLine("Time at local max " + lastTime);
                             //Decimal value_test = Decimal.Subtract(2m, 1m);
-                            Debug.WriteLine("time differece " + value);
+                            Debug.WriteLine("Time difference " + value);
                             //Debug.WriteLine("test difference" + value_test);
 
                             //prep for next collection of Gitt data
@@ -174,6 +176,11 @@ namespace GITT_Analysis
                             continue;
                         }
                     }
+                }
+                if (differenceFromLastMeasurement < Threshold)
+                {
+                    lastPotential = measurement.Potential;
+                    lastTime = measurement.Time;
                 }
             }
         }
@@ -294,7 +301,11 @@ namespace GITT_Analysis
                         }
 
                     }
-
+                    if (differenceFromLastMeasurement < Threshold)
+                    {
+                        lastPotential = measurement.Potential;
+                        lastTime = measurement.Time;
+                    }
                 }
 
                 
