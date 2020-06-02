@@ -66,6 +66,7 @@ namespace GITT_Analysis
             bool firstMeasurement = true;
             decimal lastPotential = 10;//The potential will always be less than 10 V.
             decimal lastTime = 0;
+            decimal lastLithium = 0;
             decimal localMaximum = 0;
             decimal localMinimum = 0;
 
@@ -76,6 +77,8 @@ namespace GITT_Analysis
             decimal es_final = 0;
             decimal et_initial = 0;
             decimal et_final = 0;
+            decimal lithium_initial = 0;
+            decimal lithium_final = 0;
 
             decimal line_counter = 0;
             decimal object_counter = 0;
@@ -100,11 +103,14 @@ namespace GITT_Analysis
                 if (IR_drop == true)//dette bruges efter local max er detected, således IR-drop springes over.
                 {
                     et_initial = measurement.Potential;
+                    lithium_initial = measurement.Lithium;//collect info about lithium
                     IR_drop = false;
                     Decimal value2 = Decimal.Subtract(lastPotential, measurement.Potential);//faktisk ikke det reelle IR-drop, men fra punkt to til tre.
                     Debug.WriteLine("IR-drop " + value2);
                     lastPotential = measurement.Potential;
                     lastTime = measurement.Time;
+                    lastLithium = measurement.Lithium;
+
                     continue;
                 }
                 if (differenceFromLastMeasurement > Threshold)
@@ -118,6 +124,7 @@ namespace GITT_Analysis
                         es_initial = 3.4042m;
                         et_initial = 4.4015m;
                         t_initial = 8.85m;
+                        lithium_initial = 0;
                         continue;
                     }
                     //detect local minimum
@@ -128,11 +135,13 @@ namespace GITT_Analysis
                             localMinimum = measurement.Potential;
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
+                            lastLithium = measurement.Lithium;
                         }
                         if(measurement.Potential > lastPotential)//local minimum is detected (previous measurement was minimum)
                         {
                             //Collecting data
                             et_final = lastPotential;
+                            lithium_final = lastLithium;
                             t_final = lastTime;
                             //Debug.WriteLine("Difference " + differenceFromLastMeasurement);
                             minimum_counter++;
@@ -140,6 +149,7 @@ namespace GITT_Analysis
                             //Preparing for search of local maximum
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
+                            lastLithium = measurement.Lithium;
                             direction = Direction.Up;
                             continue;
                         }
@@ -159,6 +169,7 @@ namespace GITT_Analysis
                             //prep. for next iteration
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
+                            lastLithium = measurement.Lithium;
                             continue;
                         }
                         if (measurement.Potential < lastPotential)//Local maximum is detected (previous measurement was max)
@@ -166,12 +177,13 @@ namespace GITT_Analysis
                             localMaximum = lastPotential;
                             es_final = lastPotential;
                             //extract gitt data
-                            diffMeasurements.Add(new DiffMeasurement(es_initial, es_final, et_initial, et_final, t_initial, t_final));
+                            diffMeasurements.Add(new DiffMeasurement(es_initial, es_final, et_initial, et_final, t_initial, t_final, lithium_initial, lithium_final));
                             object_counter++;
                             Debug.WriteLine("Just created an object " + object_counter);
                             Decimal value = Decimal.Subtract(t_final, t_initial);
                             Debug.WriteLine("Potential at local maximum " + lastPotential);
                             Debug.WriteLine("Time at local max " + lastTime);
+                            Debug.WriteLine("Lithium initial " + lithium_initial);
                             //Decimal value_test = Decimal.Subtract(2m, 1m);
                             Debug.WriteLine("Time difference " + value);
                             //Debug.WriteLine("test difference" + value_test);
@@ -185,6 +197,7 @@ namespace GITT_Analysis
                             //prep for next iteration
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
+                            lastLithium = measurement.Lithium;
                             direction = Direction.Down;
                             continue;
                         }
@@ -194,6 +207,7 @@ namespace GITT_Analysis
                 {
                     lastPotential = measurement.Potential;
                     lastTime = measurement.Time;
+                    lastLithium = measurement.Lithium;
                 }
             }
         }
@@ -206,6 +220,7 @@ namespace GITT_Analysis
             bool firstMeasurement = true;
             decimal lastPotential = -10;//The potential will always be greater than 10 V.
             decimal lastTime = 0;
+            decimal lastLithium = 0;
             decimal localMaximum = 0;
             decimal localMinimum = 0;
 
@@ -216,6 +231,8 @@ namespace GITT_Analysis
             decimal es_final = 0;
             decimal et_initial = 0;
             decimal et_final = 0;
+            decimal lithium_initial = 0;
+            decimal lithium_final = 0;
 
             decimal line_counter = 0;
             decimal object_counter = 0;
@@ -247,11 +264,13 @@ namespace GITT_Analysis
                     if(IR_drop == true)
                     {
                         et_initial = measurement.Potential;
+                        lithium_initial = measurement.Lithium;
                         IR_drop = false;
                         Decimal value2 = Decimal.Subtract(lastPotential, measurement.Potential);//faktisk ikke det reelle IR-drop, men fra punkt to til tre.
                         Debug.WriteLine("IR-drop " + value2);
                         lastPotential = measurement.Potential;
                         lastTime = measurement.Time;
+                        lastLithium = measurement.Lithium;
                         continue;
                     }
 
@@ -262,6 +281,7 @@ namespace GITT_Analysis
                         {
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
+                            lastLithium = measurement.Lithium;
                             continue;
                         }
                         if(direction == Direction.Up && measurement.Potential < lastPotential && firstMaxReached == false)//first max is reached, and "skipped"
@@ -270,6 +290,7 @@ namespace GITT_Analysis
                             firstMaxReached = true;
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
+                            lastLithium = measurement.Lithium;
                             Debug.WriteLine("Found local maximum ");
                             continue;
                         }
@@ -286,11 +307,12 @@ namespace GITT_Analysis
                             if (firstMinReached == true)//if it is not first min.
                             {
                                 es_final = lastPotential;
-                                diffMeasurements.Add(new DiffMeasurement(es_initial, es_final, et_initial, et_final, t_initial, t_final));
+                                diffMeasurements.Add(new DiffMeasurement(es_initial, es_final, et_initial, et_final, t_initial, t_final, lithium_initial, lithium_final));
                                 object_counter++;
                                 Debug.WriteLine("Just created an object 2 " + object_counter);
                                 Decimal value = Decimal.Subtract(t_final, t_initial);
                                 Debug.WriteLine("time differece " + value);
+                                Debug.WriteLine("Lithium initial " + lithium_initial);
                             }
                             
                             //collect data
@@ -299,10 +321,12 @@ namespace GITT_Analysis
                             IR_drop = true;
                             et_initial = measurement.Potential;
                             t_initial = measurement.Time;
+                            lithium_initial = measurement.Lithium;
 
                             //prepare next iteration
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
+                            lastLithium = measurement.Lithium;
                             direction = Direction.Up;
                             Debug.WriteLine("Found local minimum ");
                             firstMinReached = true;
@@ -312,6 +336,7 @@ namespace GITT_Analysis
                         {
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
+                            lastLithium = measurement.Lithium;
                             continue;
                         }
                         if (direction == Direction.Up && measurement.Potential < lastPotential && firstMaxReached == true) //max reached, collect data.
@@ -319,10 +344,12 @@ namespace GITT_Analysis
                             //collect data
                             et_final = lastPotential;
                             t_final = lastTime;
+                            lithium_final = lastLithium;
 
                             //prepare for next iteration
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
+                            lastLithium = measurement.Lithium;
                             direction = Direction.Down;
                         }
 
@@ -331,6 +358,7 @@ namespace GITT_Analysis
                     {
                         lastPotential = measurement.Potential;
                         lastTime = measurement.Time;
+                        lastLithium = measurement.Lithium;
                     }
                 }
 
@@ -340,7 +368,7 @@ namespace GITT_Analysis
         }
 
         //oprindelig, starter med "up", men opsamler forkert data.
-        private void findLocalMaximum()
+        /*private void findLocalMaximum()
         {
             Direction direction = DetectDirection();
             //trackers
@@ -428,7 +456,7 @@ namespace GITT_Analysis
                 lastPotential = measurement.Potential;
                 lastTime = measurement.Time;
             }
-        }
+        }*/
 
         //tæller minima, ved ned. Antaget at findLocalMax reverser alle data til slut.
         private void countLocalPeaksAfterReverse() //counting local minima of second half, starting backwords. HMM, måske ikke nødvendig. Tage det bagfra, skip det første, når maxGlobal nås tages højde for det.

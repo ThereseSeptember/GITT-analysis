@@ -24,7 +24,8 @@ namespace GITT_Analysis
                 }
                 decimal potential = decimal.Parse(parts[10], NumberStyles.Float, CultureInfo.InvariantCulture);
                 decimal time = decimal.Parse(parts[7], NumberStyles.Float, CultureInfo.InvariantCulture);
-                measurements.Add(new Measurement(potential, time));
+                decimal lithium = decimal.Parse(parts[17], NumberStyles.Float, CultureInfo.InvariantCulture);
+                measurements.Add(new Measurement(potential, time, lithium));
             }
             return measurements;
         }
