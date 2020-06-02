@@ -11,7 +11,7 @@ namespace GITT_Analysis
 
         public decimal GlobalMaximum { get; set; }
 
-        public decimal Threshold { get; set; } = 0.0018m;//0.001m 6633 OVERVEJ OM DER SKAL RODES MED THRESHHOLD. TÆL HVOR MANGE TOPPER DER BURDE VÆRE I FORHOLD TIL HVAD DEN FINDER.
+        public decimal Threshold { get; set; } = 0.001m;//0.001m 6633 OVERVEJ OM DER SKAL RODES MED THRESHHOLD. TÆL HVOR MANGE TOPPER DER BURDE VÆRE I FORHOLD TIL HVAD DEN FINDER.
 
         public decimal HighestLocalMinimaAfterReverseSecondHalf { get; set; }
 
@@ -81,6 +81,7 @@ namespace GITT_Analysis
             decimal object_counter = 0;
             decimal minimum_counter = 0;
             bool globalMinimumReached = false;
+            bool IR_drop = false;
 
             //TJEK OM TALLENE PASSER ELLER OM DER SKAL LAVES EKSTRA TJEK/JUSTERINGER. HVIS ALT ER GODT, LAV LOGIK FOR GLOBALMAXIMUMREACHED = TRUE
 
@@ -96,7 +97,16 @@ namespace GITT_Analysis
                 }
 
                 decimal differenceFromLastMeasurement = Math.Abs(decimal.Subtract(lastPotential, measurement.Potential));
-
+                if (IR_drop == true)//dette bruges efter local max er detected, således IR-drop springes over.
+                {
+                    et_initial = measurement.Potential;
+                    IR_drop = false;
+                    Decimal value2 = Decimal.Subtract(lastPotential, measurement.Potential);//faktisk ikke det reelle IR-drop, men fra punkt to til tre.
+                    Debug.WriteLine("IR-drop " + value2);
+                    lastPotential = measurement.Potential;
+                    lastTime = measurement.Time;
+                    continue;
+                }
                 if (differenceFromLastMeasurement > Threshold)
                 {
                     if (direction == Direction.Down && firstMeasurement == true)
@@ -131,6 +141,7 @@ namespace GITT_Analysis
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
                             direction = Direction.Up;
+                            continue;
                         }
                         if (globalMinimumReached == true)
                         {
@@ -167,8 +178,10 @@ namespace GITT_Analysis
 
                             //prep for next collection of Gitt data
                             es_initial = lastPotential;
-                            et_initial = measurement.Potential;
-                            t_initial = measurement.Time;
+                            //disse to skal ændres til næste loop.
+                            IR_drop = true; //IR_drop sættes til true.
+                            //et_initial = measurement.Potential;
+                            t_initial = measurement.Time; //tid starter ved no-current, men pot springes over grundet IR-drop.
                             //prep for next iteration
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
@@ -210,6 +223,7 @@ namespace GITT_Analysis
             bool globalMinimumReached = false;
             bool firstMaxReached = false;
             bool firstMinReached = false;
+            bool IR_drop = false;
 
             //TJEK OM TALLENE PASSER ELLER OM DER SKAL LAVES EKSTRA TJEK/JUSTERINGER. HVIS ALT ER GODT, LAV LOGIK FOR GLOBALMAXIMUMREACHED = TRUE
 
@@ -230,6 +244,16 @@ namespace GITT_Analysis
                 if (globalMinimumReached == true)
                 {
                     decimal differenceFromLastMeasurement = Math.Abs(decimal.Subtract(lastPotential, measurement.Potential));
+                    if(IR_drop == true)
+                    {
+                        et_initial = measurement.Potential;
+                        IR_drop = false;
+                        Decimal value2 = Decimal.Subtract(lastPotential, measurement.Potential);//faktisk ikke det reelle IR-drop, men fra punkt to til tre.
+                        Debug.WriteLine("IR-drop " + value2);
+                        lastPotential = measurement.Potential;
+                        lastTime = measurement.Time;
+                        continue;
+                    }
 
                     if (differenceFromLastMeasurement > Threshold)
                     {
@@ -271,6 +295,8 @@ namespace GITT_Analysis
                             
                             //collect data
                             es_initial = lastPotential;
+                            //et_initial skal først måles næste gang.
+                            IR_drop = true;
                             et_initial = measurement.Potential;
                             t_initial = measurement.Time;
 
