@@ -290,12 +290,9 @@ namespace GITT_Analysis
                             
                             //collect data (This is done for ALL minimums also the first.)
                             tempDiffMeasurement.Es_initial = lastMeasurement.Potential;
-                            //et_initial skal først måles næste gang.
                             IR_drop = true;
-                            tempDiffMeasurement.Et_initial = measurement.Potential;//Humbalibumbalibuuuuuuuuuuu, overskrives dette ikke i IR-drop?
                             tempDiffMeasurement.Time_initial = measurement.Time;//Time for no-current is starting now, potential is collected at next iteration due to IR-drop.
-                            tempDiffMeasurement.Lithium_initial = measurement.Lithium;//Humbalibumbalibuuuuuuuuuuu, overskrives dette ikke i IR-drop?
-
+                            
                             //prepare next iteration
                             lastMeasurement = measurement;
                             direction = Direction.Up;
