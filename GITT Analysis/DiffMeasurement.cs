@@ -26,5 +26,31 @@ namespace GITT_Analysis
             this.Lithium_initial = Lithium_ini;
             this.Lithium_final = Litihum_fin;
         }
+
+        /// <summary>
+        /// Create a new diff measurement from another diff measurement
+        /// </summary>
+        /// <param name="diff"></param>
+        public DiffMeasurement(DiffMeasurement diff)
+        {
+            Es_initial = diff.Es_initial;
+            Es_final = diff.Es_final;
+            this.Et_initial = diff.Et_initial;
+            this.Et_final = diff.Et_final;
+            this.Time_initial = diff.Time_initial;
+            this.Time_final = diff.Time_final;
+            this.Lithium_initial = diff.Lithium_initial;
+            this.Lithium_final = diff.Lithium_final;
+        }
+
+        public DiffMeasurement()
+        {
+
+        }
+
+        public DiffMeasurement Clone()
+        {
+            return new DiffMeasurement(Es_initial, Es_final, Et_initial, Et_final, Time_initial, Time_final, Lithium_initial, Lithium_final);
+        }
     }
 }
