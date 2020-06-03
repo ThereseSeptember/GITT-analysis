@@ -7,6 +7,7 @@ namespace GITT_Analysis
 {
     class Analysis
     {
+        //I don't think I'm using this.
         public Direction Direction { get; set; } = Direction.Down;
 
         public decimal GlobalMaximum { get; set; }
@@ -17,6 +18,8 @@ namespace GITT_Analysis
 
         public decimal HighestLocalMinimaAfterReverseSecondHalf { get; set; }
 
+        /*Creating a list of measurements. Each measurement will contain all the data needed for calculating the diffusion coefficient. This includes all initial and final values of
+         steady-state potential, E_s, the change in potential during constant current, E_t, time and the amount of lithium in the cathode material, Li_xV_2O_5.*/
         public List<Measurement> Measurements { get; set; }
 
         public Analysis(List<Measurement>  measurements)
@@ -35,18 +38,11 @@ namespace GITT_Analysis
             //3. Analyse charge
             analyseCharge();
             Debug.WriteLine("End of file");
-
-
-            //Tidligere
-            // 2. find global maximum
-            //findGlobalMaximum();
-            // 3. find lokal maximum
-            //findLocalMaximum();
-            //count local minima from second half
-            //countLocalPeaksAfterReverse();
         }
 
-        //Finds Global minimum
+        /// <summary>
+        /// Finds global minimum, which is used to determine when the "analyseCharge" method should start collecting data.
+        /// </summary>
         private void findGlobalMinimum()
         {
             decimal minGlobalValue = 10; //It will always be less then 10 V.
@@ -61,27 +57,36 @@ namespace GITT_Analysis
             Debug.WriteLine("Global minimum " + GlobalMinimum);
         }
 
+        /// <summary>
+        /// This is a method used to analyse the discharge of the Li_xV_2_O_5 battery. It will first search for the global minimum, which is an indicator of the discharge being completed.
+        /// The method will detect local minima and maxima, extracting data from these. A maxima will be detected when the potential drops (exceeding the threshold), which means the actual maximum
+        /// will be the previous measurement (datapoint). To account for this, the previous measurement will always be saved in an object (variable-collection) called "lastMeasurement", which is
+        /// used to acces the data from the maximum. It is a similar process when detecting local minima. From manually analyzing the data, it was found that the first measurement after a local maximum
+        /// is a part of the IR-drop, which is accounted for using a boolean to indicate the IR-drop is taking place.
+        /// </summary>
         private void analyseDischarge()
         {
             Direction direction = DetectDirection();
             //trackers
-            bool firstMeasurement = true;
+            bool firstMeasurement = true; //this boolean is needed to check for the first measurement, as this is plotted in manually.
             decimal localMaximum = 0;
             decimal localMinimum = 0;
-            Measurement lastMeasurement = new Measurement(10m, 0m, 0m);//The potential will always be less than 10 V.
+            Measurement lastMeasurement = new Measurement(10m, 0m, 0m);//lastMeasurement will contain potential, time and lithium. The initial potential will always be less than 10 V.
 
-            //data needed for object
+            //data needed for object. tempDiffMeasurement will collect the data which will be used to make a "final" collection when all values are obtained.
             DiffMeasurement tempDiffMeasurement = new DiffMeasurement();
 
+            //Debugging counters (I think)
             decimal line_counter = 0;
             decimal object_counter = 0;
             decimal minimum_counter = 0;
+            //bool used to determine if the global minimum is reached
             bool globalMinimumReached = false;
+            //bool used to detect if the current measurement is within an IR-drop.
             bool IR_drop = false;
 
-            //TJEK OM TALLENE PASSER ELLER OM DER SKAL LAVES EKSTRA TJEK/JUSTERINGER. HVIS ALT ER GODT, LAV LOGIK FOR GLOBALMAXIMUMREACHED = TRUE
-
-            List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>(); //liste med enkelt-talt til udregninger
+            //List with data which will be used to calculate the diff. coefficient.
+            List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>();
 
             //from start to globalminimum
             foreach (var measurement in Measurements)
@@ -92,53 +97,55 @@ namespace GITT_Analysis
                     globalMinimumReached = true;
                 }
 
-                decimal differenceFromLastMeasurement = Math.Abs(decimal.Subtract(lastMeasurement.Potential, measurement.Potential));
-                if (IR_drop == true)//dette bruges efter local max er detected, således IR-drop springes over.
+                decimal differenceFromLastMeasurement = Math.Abs(decimal.Subtract(lastMeasurement.Potential, measurement.Potential));//used to compare to threshold.
+                if (IR_drop == true)//This will be accessed after local max is detected. If IR_drop = true, the previous measurement was in the IR-drop, but not this one. Data can be collected.
                 {
-                    tempDiffMeasurement.Et_initial = measurement.Potential;
-                    tempDiffMeasurement.Lithium_initial = measurement.Lithium;//collect info about lithium
-                    IR_drop = false;
-                    Decimal value2 = Decimal.Subtract(lastMeasurement.Potential, measurement.Potential);//faktisk ikke det reelle IR-drop, men fra punkt to til tre.
-                    Debug.WriteLine("IR-drop " + value2);
-                    lastMeasurement = measurement;
+                    tempDiffMeasurement.Et_initial = measurement.Potential;//Collecting E_t initial.
+                    tempDiffMeasurement.Lithium_initial = measurement.Lithium;//Collecting lithium initial.
+                    IR_drop = false; //setting the IR_drop to false, such that "regular" datacollecting can continue.
+                    Decimal value2 = Decimal.Subtract(lastMeasurement.Potential, measurement.Potential);//Debugging, faktisk ikke det reelle IR-drop, men fra punkt to til tre.
+                    Debug.WriteLine("IR-drop " + value2);//debugging
+                    lastMeasurement = measurement;//opdating lastMeasurement before continuing to the next measurement.
 
                     continue;
                 }
                 if (differenceFromLastMeasurement > Threshold)
                 {
-                    if (direction == Direction.Down && firstMeasurement == true)
+                    if (direction == Direction.Down && firstMeasurement == true)//This will only be accesed upon the very first measurement. This is used to set the first data manually as no logic was made for detecting those.
                     {
-                        //make some logic that works for the first measurement.
+                        //Potentially: make some logic that works for the first measurement.
                         firstMeasurement = false;
-                        direction = Direction.Down;
-                        //Dummy numbers
+                        direction = Direction.Down; //setting the direction to down, but it already is?
+                        //The first measurement/local max is set manually, as the potential varies a lot within the first few seconds making it difficult to make logic, as it is not a local max. Maybe threshold can help.
+                        //Dummy numbers SHOULD BE CORRECTED!!!!!
                         tempDiffMeasurement.Es_initial = 3.4042m;
                         tempDiffMeasurement.Et_initial = 4.4015m;
                         tempDiffMeasurement.Time_initial = 8.85m;
                         tempDiffMeasurement.Lithium_initial = 0;
                         continue;
                     }
-                    //detect local minimum
+                    //Detecting local minimum. Direction is down and it is no longer the first measurement.
                     if (direction == Direction.Down && firstMeasurement == false)
                     {
-                        if (measurement.Potential < lastMeasurement.Potential)
+                        if (measurement.Potential < lastMeasurement.Potential)//Local minimum not found - the current measurement has lower potential than last measurement.
                         {
-                            localMinimum = measurement.Potential;
-                            lastMeasurement = measurement;
+                            localMinimum = measurement.Potential;//setting localminimum to current potential, as it is, currently, the lowest potential detected.
+                            lastMeasurement = measurement;//updating lastMeasurement before analysing the next measurement.            
                         }
-                        if(measurement.Potential > lastMeasurement.Potential)//local minimum is detected (previous measurement was minimum)
+                        if(measurement.Potential > lastMeasurement.Potential)//Local minimum is found - previous potential is smaller than current -> the previous measurement was minimum.
                         {
-                            //Collecting data
+                            //Collecting data from the local minimum
                             tempDiffMeasurement.Et_final = lastMeasurement.Potential;
                             tempDiffMeasurement.Lithium_final = lastMeasurement.Lithium;
                             tempDiffMeasurement.Time_final = lastMeasurement.Time;
                             //Debug.WriteLine("Difference " + differenceFromLastMeasurement);
+                            //minimum_counter used for debugging.
                             minimum_counter++;
                             //Debug.WriteLine("Minimum detected " + minimum_counter);
                             //Preparing for search of local maximum
-                            lastMeasurement = measurement;
-                            direction = Direction.Up;
-                            continue;
+                            lastMeasurement = measurement;//updating lastMeasurement before analysing the next measurement.
+                            direction = Direction.Up;//changing direction to "up", which means it is now searching for a local maximum.
+                            continue;                            
                         }
                         if (globalMinimumReached == true)
                         {
@@ -336,9 +343,7 @@ namespace GITT_Analysis
             GlobalMaximum = maxGlobalValue;
         }
 
-        /// <summary>
-        /// Detects the direction the graph is going.
-        /// </summary>
+        //I don't think I'm using this
         private Direction DetectDirection()
         {
             //todo: actually analyze the graph to find the correct direction
