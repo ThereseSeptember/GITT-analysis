@@ -300,6 +300,7 @@ namespace GITT_Analysis
                         {
                             lastPotential = measurement.Potential;
                             lastTime = measurement.Time;
+                            lastLithium = measurement.Lithium;
                             continue;
                         }
                         if (direction == Direction.Down && measurement.Potential > lastPotential && firstMaxReached == true)//if current potenial is greater than last, min reached.
