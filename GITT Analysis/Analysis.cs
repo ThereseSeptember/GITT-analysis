@@ -38,6 +38,8 @@ namespace GITT_Analysis
             //3. Analyse charge
             analyseCharge();
             Debug.WriteLine("End of file");
+            //calculate diff.coeff.
+            calculateDiffusionCoefficient();
         }
 
         /// <summary>
@@ -85,7 +87,7 @@ namespace GITT_Analysis
             bool IR_drop = false;
 
             //List with data which will be used to calculate the diff. coefficient.
-            List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>();
+            List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>();//maybe return this?
 
             //from start to globalminimum
             foreach (var measurement in Measurements)
@@ -296,7 +298,6 @@ namespace GITT_Analysis
                             //prepare next iteration
                             lastMeasurement = measurement;
                             direction = Direction.Up;
-                            Debug.WriteLine("Found local minimum ");
                             firstMinReached = true;
                             continue;
                         }
@@ -330,6 +331,10 @@ namespace GITT_Analysis
         }
 
 
+        private void calculateDiffusionCoefficient()
+        {
+            Debug.WriteLine("Let's calculate stuff");
+        }
         private void findGlobalMaximum()
         {
             decimal maxGlobalValue = 0;
