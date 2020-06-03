@@ -69,7 +69,6 @@ namespace GITT_Analysis
             Direction direction = DetectDirection();
             //trackers
             bool firstMeasurement = true; //this boolean is needed to check for the first measurement, as this is plotted in manually.
-            decimal localMaximum = 0;
             decimal localMinimum = 0;
             Measurement lastMeasurement = new Measurement(10m, 0m, 0m);//lastMeasurement will contain potential, time and lithium. The initial potential will always be less than 10 V.
 
@@ -153,23 +152,22 @@ namespace GITT_Analysis
                             break;
                         }
                     }
-                    //detect local maximum HER ER JEG KOMMET TIL!
+                    //Detect local maximum, this is done when local minimum is reached and direction is changed.
                     if (direction == Direction.Up && firstMeasurement == false)
                     {
-                        if (measurement.Potential > lastMeasurement.Potential)//current is larger than last, keep searching.
+                        if (measurement.Potential > lastMeasurement.Potential)//Local max is not reached, current potential is bigger than the previous measurement.
                         {
-                            //current is larger than last.
-                            localMaximum = measurement.Potential;
-                            //prep. for next iteration
+                            //updating lastMeasurement before analysing the next measurement.
                             lastMeasurement = measurement;
                             continue;
                         }
-                        if (measurement.Potential < lastMeasurement.Potential)//Local maximum is detected (previous measurement was max)
+                        if (measurement.Potential < lastMeasurement.Potential)//Local maximum is detected - previous measurement was max
                         {
-                            localMaximum = lastMeasurement.Potential;
+                            //Collect data
                             tempDiffMeasurement.Es_final = lastMeasurement.Potential;
-                            //extract gitt data
+                            //Extract GITT data
                             diffMeasurements.Add(new DiffMeasurement(tempDiffMeasurement));
+                            //Debugging purposes
                             object_counter++;
                             Debug.WriteLine("Just created an object " + object_counter);
                             Decimal value = Decimal.Subtract(tempDiffMeasurement.Time_final, tempDiffMeasurement.Time_initial);
@@ -179,15 +177,16 @@ namespace GITT_Analysis
                             //Decimal value_test = Decimal.Subtract(2m, 1m);
                             Debug.WriteLine("Time difference " + value);
                             //Debug.WriteLine("test difference" + value_test);
+                            //Debugging purposes end!!
 
-                            //prep for next collection of Gitt data
+                            //Preperation for next collection of GITT data
                             tempDiffMeasurement.Es_initial = lastMeasurement.Potential;
-                            //disse to skal ændres til næste loop.
+                            //We are currently in an IR-drop (this is known from manual analysis)
                             IR_drop = true; //IR_drop sættes til true.
-                            //et_initial = measurement.Potential;
-                            tempDiffMeasurement.Time_initial = measurement.Time; //tid starter ved no-current, men pot springes over grundet IR-drop.
+                            tempDiffMeasurement.Time_initial = measurement.Time; //Time for no-current is starting now, potential is collected at next iteration due to IR-drop.
                             //prep for next iteration
                             lastMeasurement = measurement;
+                            //It will now search for a local minimum.
                             direction = Direction.Down;
                             continue;
                         }
@@ -205,56 +204,57 @@ namespace GITT_Analysis
         {
             Direction direction = Direction.Up;
             //trackers
-            bool firstMeasurement = true;
-            Measurement lastMeasurement = new Measurement(-10m, 0m, 0m); //The potential will always be greater than 10 V.
-            decimal localMaximum = 0;
-            decimal localMinimum = 0;
-
+            Measurement lastMeasurement = new Measurement(-10m, 0m, 0m); //Keeping track of previous measurement. The potential will always be greater than -10 V.
+           
             //data needed for object
             DiffMeasurement tempDiffMeasurement = new DiffMeasurement();
             
+            //debugging
             decimal object_counter = 0;
+
+            //Booleans used to keep track of data
             bool globalMinimumReached = false;
             bool firstMaxReached = false;
             bool firstMinReached = false;
             bool IR_drop = false;
 
-            //TJEK OM TALLENE PASSER ELLER OM DER SKAL LAVES EKSTRA TJEK/JUSTERINGER. HVIS ALT ER GODT, LAV LOGIK FOR GLOBALMAXIMUMREACHED = TRUE
+            List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>(); //List with variables for calculating diff. coefficient.  
 
-            List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>(); //liste med enkelt-talt til udregninger  
-
-            //from global minimum to end
+            //This will be analysing data from the global minimum till the end.
             foreach (var measurement in Measurements)
             {
-                if (measurement.Potential != GlobalMinimum && globalMinimumReached == false)
+                if (measurement.Potential != GlobalMinimum && globalMinimumReached == false)//The global minimum has not been reached - continue to next measurement.
                 {
                     continue;
                 }
-                if (measurement.Potential == GlobalMinimum)
+                if (measurement.Potential == GlobalMinimum)//The global minimum has been reached - let the fun begin!
                 {
                     globalMinimumReached = true;
                     
                 }
-                if (globalMinimumReached == true)
+                if (globalMinimumReached == true)//If the global minimum has been reached, the data-collection can start!
                 {
-                    decimal differenceFromLastMeasurement = Math.Abs(decimal.Subtract(lastMeasurement.Potential, measurement.Potential));
-                    if(IR_drop == true)
+                    decimal differenceFromLastMeasurement = Math.Abs(decimal.Subtract(lastMeasurement.Potential, measurement.Potential));//Used when comparing to the threshold.
+                    if(IR_drop == true)//Inside IR-drop.
                     {
+                        //collecting data
                         tempDiffMeasurement.Et_initial = measurement.Potential;
                         tempDiffMeasurement.Lithium_initial = measurement.Lithium;
                         IR_drop = false;
+                        //debugging purposes
                         Decimal value2 = Decimal.Subtract(lastMeasurement.Potential, measurement.Potential);//faktisk ikke det reelle IR-drop, men fra punkt to til tre.
                         Debug.WriteLine("IR-drop " + value2);
-                        lastMeasurement = measurement;
+                        //debugging end
+                        lastMeasurement = measurement;//updating lastMeasurement before analysing the next measurement.
                         continue;
                     }
 
                     if (differenceFromLastMeasurement > Threshold)
                     {
-                        //searching for first local maximum after global minimum, data is discarded
-                        if(direction == Direction.Up && measurement.Potential > lastMeasurement.Potential && firstMaxReached == false)//if current is bigger than last, first max not reached.
+                        //Searching for first local maximum after global minimum, data is discarded due to irregular measurement conditions.
+                        if(direction == Direction.Up && measurement.Potential > lastMeasurement.Potential && firstMaxReached == false)//If current is bigger than last, first max not reached.
                         {
-                            lastMeasurement = measurement;
+                            lastMeasurement = measurement;//updating lastMeasurement before analysing the next measurement.
                             continue;
                         }
                         if(direction == Direction.Up && measurement.Potential < lastMeasurement.Potential && firstMaxReached == false)//first max is reached, and "skipped"
@@ -262,36 +262,39 @@ namespace GITT_Analysis
                             direction = Direction.Down;
                             firstMaxReached = true;
                             lastMeasurement = measurement;
-                            Debug.WriteLine("Found local maximum ");
+                            Debug.WriteLine("Found local maximum SKIP ");
                             continue;
                         }
                         
-                        //searching for local minimum after global minimum, data is collected
+                        //Searching for local minimum after global minimum, data is collected
                         if (direction == Direction.Down && measurement.Potential < lastMeasurement.Potential && firstMaxReached == true)//if current potential is smaller than last, min not reached
                         {
                             lastMeasurement = measurement;
                             continue;
                         }
-                        if (direction == Direction.Down && measurement.Potential > lastMeasurement.Potential && firstMaxReached == true)//if current potenial is greater than last, min reached.
+                        if (direction == Direction.Down && measurement.Potential > lastMeasurement.Potential && firstMaxReached == true)//if current potenial is greater than last, min reached - the previous measurement was the minimum.
                         {
-                            if (firstMinReached == true)//if it is not first min.
+                            if (firstMinReached == true)//If it is not first min, data can be extracted.
                             {
                                 tempDiffMeasurement.Es_final = lastMeasurement.Potential;
+                                //Extracting data used to calculate the diff. coef.
                                 diffMeasurements.Add(new DiffMeasurement(tempDiffMeasurement));
+                                //Debugging purposes
                                 object_counter++;
                                 Debug.WriteLine("Just created an object 2 " + object_counter);
                                 Decimal value = Decimal.Subtract(tempDiffMeasurement.Time_final, tempDiffMeasurement.Time_initial);
                                 Debug.WriteLine("time differece " + value);
                                 Debug.WriteLine("Lithium initial " + tempDiffMeasurement.Lithium_initial);
+                                //Debugging puposes end
                             }
                             
-                            //collect data
+                            //collect data (This is done for ALL minimums also the first.)
                             tempDiffMeasurement.Es_initial = lastMeasurement.Potential;
                             //et_initial skal først måles næste gang.
                             IR_drop = true;
-                            tempDiffMeasurement.Et_initial = measurement.Potential;
-                            tempDiffMeasurement.Time_initial = measurement.Time;
-                            tempDiffMeasurement.Lithium_initial = measurement.Lithium;
+                            tempDiffMeasurement.Et_initial = measurement.Potential;//Humbalibumbalibuuuuuuuuuuu, overskrives dette ikke i IR-drop?
+                            tempDiffMeasurement.Time_initial = measurement.Time;//Time for no-current is starting now, potential is collected at next iteration due to IR-drop.
+                            tempDiffMeasurement.Lithium_initial = measurement.Lithium;//Humbalibumbalibuuuuuuuuuuu, overskrives dette ikke i IR-drop?
 
                             //prepare next iteration
                             lastMeasurement = measurement;
