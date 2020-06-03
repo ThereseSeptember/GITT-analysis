@@ -334,9 +334,41 @@ namespace GITT_Analysis
         }
 
 
-        private void calculateDiffusionCoefficient()
+        private void calculateDiffusionCoefficient()//maybe do this once for charge and once for discharge? evt nummeriske værdier?
         {
+            decimal counter = 0;
+            //Data needed for the calculation.
+            decimal mass = 0m;
+            decimal molar_mass = 0m;
+            decimal molar_volume = 0m;
+            decimal area = 0m;
+            //constants
+            decimal pi = 3.1415926m;
+
             Debug.WriteLine("Let's calculate stuff");
+
+            foreach (DiffMeasurement diffmeasurement in diffMeasurements)
+            {
+                //calculate all diff. coeff.
+                //caluclate delta t, delta E_t and delta E_s (and avg. lithium)
+                Decimal dE_t = Decimal.Subtract(diffmeasurement.Et_final , diffmeasurement.Et_initial);
+                Decimal dE_s = Decimal.Subtract(diffmeasurement.Es_final, diffmeasurement.Es_initial);
+                Decimal dtime = Decimal.Subtract(diffmeasurement.Time_final, diffmeasurement.Time_initial);
+                //calculating sum of lithium
+                Decimal dlith_sum = Decimal.Add(diffmeasurement.Lithium_final, diffmeasurement.Lithium_initial);
+                //calculating average of litihum
+                Decimal dlith = Decimal.Divide(dlith_sum,2);
+                //calculate diff coef.
+                //return diff coef. and delta li.
+                counter++;
+                Debug.WriteLine(counter);
+                Debug.WriteLine(dE_t);
+                Debug.WriteLine(dE_s);
+                Debug.WriteLine(dtime);
+                Debug.WriteLine(dlith);
+                
+            }
+            Debug.WriteLine(diffMeasurements);
         }
         private void findGlobalMaximum()
         {
