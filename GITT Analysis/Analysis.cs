@@ -153,7 +153,7 @@ namespace GITT_Analysis
                             break;
                         }
                     }
-                    //detect local maximum
+                    //detect local maximum HER ER JEG KOMMET TIL!
                     if (direction == Direction.Up && firstMeasurement == false)
                     {
                         if (measurement.Potential > lastMeasurement.Potential)//current is larger than last, keep searching.
