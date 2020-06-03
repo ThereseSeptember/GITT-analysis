@@ -22,6 +22,8 @@ namespace GITT_Analysis
          steady-state potential, E_s, the change in potential during constant current, E_t, time and the amount of lithium in the cathode material, Li_xV_2O_5.*/
         public List<Measurement> Measurements { get; set; }
 
+        public List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>();
+
         public Analysis(List<Measurement>  measurements)
         {
             Measurements = measurements;
@@ -87,7 +89,7 @@ namespace GITT_Analysis
             bool IR_drop = false;
 
             //List with data which will be used to calculate the diff. coefficient.
-            List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>();//maybe return this?
+            //List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>();//maybe return this?AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
 
             //from start to globalminimum
             foreach (var measurement in Measurements)
@@ -199,6 +201,7 @@ namespace GITT_Analysis
                     lastMeasurement = measurement;
                 }
             }
+            
         }
 
         //should be run after analyseDischarge()
@@ -220,7 +223,7 @@ namespace GITT_Analysis
             bool firstMinReached = false;
             bool IR_drop = false;
 
-            List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>(); //List with variables for calculating diff. coefficient.  
+            //List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>(); //List with variables for calculating diff. coefficient. AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
 
             //This will be analysing data from the global minimum till the end.
             foreach (var measurement in Measurements)
