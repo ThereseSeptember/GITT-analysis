@@ -304,12 +304,12 @@ namespace GITT_Analysis
         {
             decimal counter = 0;
             //Data needed for the calculation.
-            decimal mass = 0m;
-            decimal molar_mass = 0m;
-            decimal molar_volume = 0m;
-            decimal area = 0m;
+            Double mass = 0;
+            Double molar_mass = 0;
+            Double molar_volume = 0;
+            Double area = 0;
             //constants
-            decimal pi = 3.1415926m;
+            Double pi = 3.1415926;
 
             Debug.WriteLine("Let's calculate stuff");
 
@@ -317,21 +317,34 @@ namespace GITT_Analysis
             {
                 //calculate all diff. coeff.
                 //caluclate delta t, delta E_t and delta E_s (and avg. lithium)
-                Decimal dE_t = Decimal.Subtract(diffmeasurement.Et_final , diffmeasurement.Et_initial);
-                Decimal dE_s = Decimal.Subtract(diffmeasurement.Es_final, diffmeasurement.Es_initial);
-                Decimal dtime = Decimal.Subtract(diffmeasurement.Time_final, diffmeasurement.Time_initial);
+                Decimal ddE_t = Decimal.Subtract(diffmeasurement.Et_final , diffmeasurement.Et_initial);
+                Double dE_t = Decimal.ToDouble(ddE_t);//converting to 'double' as this is needed for the math-functions.
+                Decimal ddE_s = Decimal.Subtract(diffmeasurement.Es_final, diffmeasurement.Es_initial);
+                Double dE_s = Decimal.ToDouble(ddE_s);//converting to 'double' as this is needed for the math-functions.
+                Decimal ddtime = Decimal.Subtract(diffmeasurement.Time_final, diffmeasurement.Time_initial);
+                Double dtime = Decimal.ToDouble(ddtime);//converting to 'double' as this is needed for the math-functions.
                 //calculating sum of lithium
-                Decimal dlith_sum = Decimal.Add(diffmeasurement.Lithium_final, diffmeasurement.Lithium_initial);
+                Decimal ddlith_sum = Decimal.Add(diffmeasurement.Lithium_final, diffmeasurement.Lithium_initial);
                 //calculating average of litihum
-                Decimal dlith = Decimal.Divide(dlith_sum,2);
+                Decimal ddlith = Decimal.Divide(ddlith_sum,2);
+                Double dlith = Decimal.ToDouble(ddlith);
                 //calculate diff coef.
                 //return diff coef. and delta li.
                 counter++;
                 Debug.WriteLine(counter);
+                Debug.WriteLine("E_t " + ddE_t);
                 Debug.WriteLine("E_t " + dE_t);
+                Debug.WriteLine("E_s " + ddE_s);
                 Debug.WriteLine("E_s " + dE_s);
+                Debug.WriteLine("time " + ddtime);
                 Debug.WriteLine("time " + dtime);
+                Debug.WriteLine("Lithium " + ddlith);
                 Debug.WriteLine("Lithium " + dlith);
+                //calculate diff. coef.
+                //First term
+                Debug.WriteLine(4/(pi*600));
+                //Last parenthesis
+                Debug.WriteLine(Math.Pow((dE_s/dE_t), 2));
                 
             }
             Debug.WriteLine(diffMeasurements);
