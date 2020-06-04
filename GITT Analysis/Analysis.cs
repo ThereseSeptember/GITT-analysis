@@ -343,15 +343,15 @@ namespace GITT_Analysis
                 //calculate diff. coef.
                 //First term
                 Double first_term = 4 / (pi * 600);
-                Debug.WriteLine(first_term);
+                Debug.WriteLine("first term " + first_term);
                 //second term
-                Double second_term = Math.Pow((mass * molar_volume) / (molar_mass * area), 2);
-                Debug.WriteLine(second_term);
+                Double second_term = Math.Pow(((mass * molar_volume) / (molar_mass * area)), 2);
+                Debug.WriteLine("second term " + second_term);
                 //Last term
                 Double third_term = Math.Pow((dE_s / dE_t), 2);
-                Debug.WriteLine(third_term);
+                Debug.WriteLine("third term " + third_term);
                 Double diff_coef = first_term * second_term * third_term;
-                Debug.WriteLine("Diffusion Coefficient " + diff_coef);//seems to work
+                Debug.WriteLine("Diffusion Coefficient " + diff_coef);//WORKS!
                 
             }
             Debug.WriteLine(diffMeasurements);
