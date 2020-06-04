@@ -79,10 +79,6 @@ namespace GITT_Analysis
             //data needed for object. tempDiffMeasurement will collect the data which will be used to make a "final" collection when all values are obtained.
             DiffMeasurement tempDiffMeasurement = new DiffMeasurement();
 
-            //Debugging counters (I think)
-            decimal line_counter = 0;
-            decimal object_counter = 0;
-            decimal minimum_counter = 0;
             //bool used to determine if the global minimum is reached
             bool globalMinimumReached = false;
             //bool used to detect if the current measurement is within an IR-drop.
@@ -94,7 +90,7 @@ namespace GITT_Analysis
             //from start to globalminimum
             foreach (var measurement in Measurements)
             {
-                line_counter++;
+                
                 if (measurement.Potential == GlobalMinimum)
                 {
                     globalMinimumReached = true;
@@ -141,10 +137,7 @@ namespace GITT_Analysis
                             tempDiffMeasurement.Et_final = lastMeasurement.Potential;
                             tempDiffMeasurement.Lithium_final = lastMeasurement.Lithium;
                             tempDiffMeasurement.Time_final = lastMeasurement.Time;
-                            //Debug.WriteLine("Difference " + differenceFromLastMeasurement);
-                            //minimum_counter used for debugging.
-                            minimum_counter++;
-                            //Debug.WriteLine("Minimum detected " + minimum_counter);
+                            
                             //Preparing for search of local maximum
                             lastMeasurement = measurement;//updating lastMeasurement before analysing the next measurement.
                             direction = Direction.Up;//changing direction to "up", which means it is now searching for a local maximum.
@@ -171,18 +164,7 @@ namespace GITT_Analysis
                             tempDiffMeasurement.Es_final = lastMeasurement.Potential;
                             //Extract GITT data
                             diffMeasurements.Add(new DiffMeasurement(tempDiffMeasurement));
-                            //Debugging purposes
-                            object_counter++;
-                            Debug.WriteLine("Just created an object " + object_counter);
-                            Decimal value = Decimal.Subtract(tempDiffMeasurement.Time_final, tempDiffMeasurement.Time_initial);
-                            Debug.WriteLine("Potential at local maximum " + lastMeasurement.Potential);
-                            Debug.WriteLine("Time at local max " + lastMeasurement.Time);
-                            Debug.WriteLine("Lithium initial " + tempDiffMeasurement.Lithium_initial);
-                            //Decimal value_test = Decimal.Subtract(2m, 1m);
-                            Debug.WriteLine("Time difference " + value);
-                            //Debug.WriteLine("test difference" + value_test);
-                            //Debugging purposes end!!
-
+                            
                             //Preperation for next collection of GITT data
                             tempDiffMeasurement.Es_initial = lastMeasurement.Potential;
                             //We are currently in an IR-drop (this is known from manual analysis)
@@ -214,9 +196,6 @@ namespace GITT_Analysis
             //data needed for object
             DiffMeasurement tempDiffMeasurement = new DiffMeasurement();
             
-            //debugging
-            decimal object_counter = 0;
-
             //Booleans used to keep track of data
             bool globalMinimumReached = false;
             bool firstMaxReached = false;
@@ -246,10 +225,7 @@ namespace GITT_Analysis
                         tempDiffMeasurement.Et_initial = measurement.Potential;
                         tempDiffMeasurement.Lithium_initial = measurement.Lithium;
                         IR_drop = false;
-                        //debugging purposes
-                        Decimal value2 = Decimal.Subtract(lastMeasurement.Potential, measurement.Potential);//faktisk ikke det reelle IR-drop, men fra punkt to til tre.
-                        Debug.WriteLine("IR-drop " + value2);
-                        //debugging end
+                        
                         lastMeasurement = measurement;//updating lastMeasurement before analysing the next measurement.
                         continue;
                     }
@@ -267,7 +243,6 @@ namespace GITT_Analysis
                             direction = Direction.Down;
                             firstMaxReached = true;
                             lastMeasurement = measurement;
-                            Debug.WriteLine("Found local maximum SKIP ");
                             continue;
                         }
                         
@@ -284,13 +259,7 @@ namespace GITT_Analysis
                                 tempDiffMeasurement.Es_final = lastMeasurement.Potential;
                                 //Extracting data used to calculate the diff. coef.
                                 diffMeasurements.Add(new DiffMeasurement(tempDiffMeasurement));
-                                //Debugging purposes
-                                object_counter++;
-                                Debug.WriteLine("Just created an object 2 " + object_counter);
-                                Decimal value = Decimal.Subtract(tempDiffMeasurement.Time_final, tempDiffMeasurement.Time_initial);
-                                Debug.WriteLine("time differece " + value);
-                                Debug.WriteLine("Lithium initial " + tempDiffMeasurement.Lithium_initial);
-                                //Debugging puposes end
+                                
                             }
                             
                             //collect data (This is done for ALL minimums also the first.)
