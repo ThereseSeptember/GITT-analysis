@@ -304,10 +304,10 @@ namespace GITT_Analysis
         {
             decimal counter = 0;
             //Data needed for the calculation.
-            Double mass = 0;
-            Double molar_mass = 0;
-            Double molar_volume = 0;
-            Double area = 0;
+            Double mass = 0.002707;//g
+            Double molar_mass = 181.88;//g/mol
+            Double molar_volume = 0.05413095;// molar_mass/density -> 181.88 g/mol / 3.36 g/mL -> 0.05413095 L/mol
+            Double area = 0.00007853982;//A = pi * r^2 -> pi * 0.005 m = 7.853982*10^-5 m^2
             //constants
             Double pi = 3.1415926;
 
@@ -342,9 +342,16 @@ namespace GITT_Analysis
                 Debug.WriteLine("Lithium " + dlith);
                 //calculate diff. coef.
                 //First term
-                Debug.WriteLine(4/(pi*600));
-                //Last parenthesis
-                Debug.WriteLine(Math.Pow((dE_s/dE_t), 2));
+                Double first_term = 4 / (pi * 600);
+                Debug.WriteLine(first_term);
+                //second term
+                Double second_term = Math.Pow((mass * molar_volume) / (molar_mass * area), 2);
+                Debug.WriteLine(second_term);
+                //Last term
+                Double third_term = Math.Pow((dE_s / dE_t), 2);
+                Debug.WriteLine(third_term);
+                Double diff_coef = first_term * second_term * third_term;
+                Debug.WriteLine("Diffusion Coefficient " + diff_coef);//seems to work
                 
             }
             Debug.WriteLine(diffMeasurements);
