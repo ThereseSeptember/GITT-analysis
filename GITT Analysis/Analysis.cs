@@ -121,9 +121,9 @@ namespace GITT_Analysis
                         direction = Direction.Down; //setting the direction to down, but it already is?
                         //The first measurement/local max is set manually, as the potential varies a lot within the first few seconds making it difficult to make logic, as it is not a local max. Maybe threshold can help.
                         //Dummy numbers SHOULD BE CORRECTED!!!!!
-                        tempDiffMeasurement.Es_initial = 3.4042m;
-                        tempDiffMeasurement.Et_initial = 4.4015m;
-                        tempDiffMeasurement.Time_initial = 8.85m;
+                        tempDiffMeasurement.Es_initial = 3.40479m;
+                        tempDiffMeasurement.Et_initial = 3.3905m;
+                        tempDiffMeasurement.Time_initial = 9.9998m;
                         tempDiffMeasurement.Lithium_initial = 0;
                         continue;
                     }
@@ -362,10 +362,10 @@ namespace GITT_Analysis
                 //return diff coef. and delta li.
                 counter++;
                 Debug.WriteLine(counter);
-                Debug.WriteLine(dE_t);
-                Debug.WriteLine(dE_s);
-                Debug.WriteLine(dtime);
-                Debug.WriteLine(dlith);
+                Debug.WriteLine("E_t " + dE_t);
+                Debug.WriteLine("E_s " + dE_s);
+                Debug.WriteLine("time " + dtime);
+                Debug.WriteLine("Lithium " + dlith);
                 
             }
             Debug.WriteLine(diffMeasurements);
