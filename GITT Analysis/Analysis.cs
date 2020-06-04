@@ -102,8 +102,6 @@ namespace GITT_Analysis
                     tempDiffMeasurement.Et_initial = measurement.Potential;//Collecting E_t initial.
                     tempDiffMeasurement.Lithium_initial = measurement.Lithium;//Collecting lithium initial.
                     IR_drop = false; //setting the IR_drop to false, such that "regular" datacollecting can continue.
-                    Decimal value2 = Decimal.Subtract(lastMeasurement.Potential, measurement.Potential);//Debugging, faktisk ikke det reelle IR-drop, men fra punkt to til tre.
-                    Debug.WriteLine("IR-drop " + value2);//debugging
                     lastMeasurement = measurement;//opdating lastMeasurement before continuing to the next measurement.
 
                     continue;
@@ -145,7 +143,6 @@ namespace GITT_Analysis
                         }
                         if (globalMinimumReached == true)
                         {
-                            Debug.WriteLine("I'm at the bottom of the ocean");
                             break;
                         }
                     }
