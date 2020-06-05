@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace GITT_Analysis
@@ -311,6 +312,23 @@ namespace GITT_Analysis
             //constants
             Double pi = 3.1415926;
 
+            //Make file
+            //determine file path/name
+            string GITT_data_file = @"C:\Users\the-m\Desktop\GITT_data_file.txt";
+
+            //Check if file already exist
+            if (File.Exists(GITT_data_file))
+            {
+                File.Delete(GITT_data_file);
+            }
+
+            //create new file
+            using FileStream fs = File.Create(GITT_data_file);
+            using var sr = new StreamWriter(fs);
+
+            sr.WriteLine("Diffusion coefficient" + "\t" + "Lithium");
+            
+
             Debug.WriteLine("Let's calculate stuff");
 
             foreach (DiffMeasurement diffmeasurement in diffMeasurements)
@@ -352,9 +370,11 @@ namespace GITT_Analysis
                 Debug.WriteLine("third term " + third_term);
                 Double diff_coef = first_term * second_term * third_term;
                 Debug.WriteLine("Diffusion Coefficient " + diff_coef);//WORKS!
-                
+                //Write to file
+                sr.WriteLine(diff_coef + "\t" + dlith);
+                                
             }
-            Debug.WriteLine(diffMeasurements);
+            
         }
         private void findGlobalMaximum()
         {
