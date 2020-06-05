@@ -350,21 +350,21 @@ namespace GITT_Analysis
                 //return diff coef. and delta li.
                 counter++;
                 Debug.WriteLine(counter);
-                Debug.WriteLine("E_t " + ddE_t);
+                
                 Debug.WriteLine("E_t " + dE_t);
-                Debug.WriteLine("E_s " + ddE_s);
+                
                 Debug.WriteLine("E_s " + dE_s);
-                Debug.WriteLine("time " + ddtime);
+                
                 Debug.WriteLine("time " + dtime);
-                Debug.WriteLine("Lithium " + ddlith);
+                
                 Debug.WriteLine("Lithium " + dlith);
                 //calculate diff. coef.
                 //First term
                 Double first_term = 4 / (pi * 600);
-                Debug.WriteLine("first term " + first_term);
+                
                 //second term
                 Double second_term = Math.Pow(((mass * molar_volume) / (molar_mass * area)), 2);
-                Debug.WriteLine("second term " + second_term);
+                
                 //Last term
                 Double third_term = Math.Pow((dE_s / dE_t), 2);
                 Debug.WriteLine("third term " + third_term);
