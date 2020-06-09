@@ -116,9 +116,9 @@ namespace GITT_Analysis
                         direction = Direction.Down; //setting the direction to down, but it already is?
                         //The first measurement/local max is set manually, as the potential varies a lot within the first few seconds making it difficult to make logic, as it is not a local max. Maybe threshold can help.
                         //Dummy numbers SHOULD BE CORRECTED!!!!!
-                        tempDiffMeasurement.Es_initial = 3.40479m;
-                        tempDiffMeasurement.Et_initial = 3.3905m;
-                        tempDiffMeasurement.Time_initial = 9.9998m;
+                        tempDiffMeasurement.Es_initial = 3.242528915m; //DIFFERENT FOR EACH. Li3 first run: 3.40479m. Li3 second run: 3.242528915m
+                        tempDiffMeasurement.Et_initial = 3.20542645m; //DIFFERENT FOR EACH. Li3 first run: 3.3905m. Li3 second run: 3.20542645m
+                        tempDiffMeasurement.Time_initial = 9.9998m; //DIFFERENT FOR EACH. Li3 first run: 9.9998m. Li3 second run: 9.9998m
                         tempDiffMeasurement.Lithium_initial = 0;
                         continue;
                     }
@@ -305,7 +305,7 @@ namespace GITT_Analysis
         {
             decimal counter = 0;
             //Data needed for the calculation.
-            Double mass = 0.002707;//g
+            Double mass = 0.002707;//g DIFFERENT FOR EACH Li3 first and second run: 0.002707
             Double molar_mass = 181.88;//g/mol
             Double molar_volume = 0.05413095;// molar_mass/density -> 181.88 g/mol / 3.36 g/mL -> 0.05413095 L/mol
             Double area = 0.00007853982;//A = pi * r^2 -> pi * 0.005 m = 7.853982*10^-5 m^2
