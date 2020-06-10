@@ -80,21 +80,16 @@ namespace GITT_Analysis
             //data needed for object. tempDiffMeasurement will collect the data which will be used to make a "final" collection when all values are obtained.
             DiffMeasurement tempDiffMeasurement = new DiffMeasurement();
 
-            //bool used to determine if the global minimum is reached
-            bool globalMinimumReached = false;
             //bool used to detect if the current measurement is within an IR-drop.
             bool IR_drop = false;
-
-            //List with data which will be used to calculate the diff. coefficient.
-            //List<DiffMeasurement> diffMeasurements = new List<DiffMeasurement>();//maybe return this?AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa
-
+                        
             //from start to globalminimum
             foreach (var measurement in Measurements)
             {
                 
                 if (measurement.Potential == GlobalMinimum)
                 {
-                    globalMinimumReached = true;
+                    break;//The last titrations is discarded due to invalid E_s!!
                 }
 
                 decimal differenceFromLastMeasurement = Math.Abs(decimal.Subtract(lastMeasurement.Potential, measurement.Potential));//used to compare to threshold.
@@ -141,10 +136,6 @@ namespace GITT_Analysis
                             lastMeasurement = measurement;//updating lastMeasurement before analysing the next measurement.
                             direction = Direction.Up;//changing direction to "up", which means it is now searching for a local maximum.
                             continue;                            
-                        }
-                        if (globalMinimumReached == true)
-                        {
-                            break;
                         }
                     }
                     //Detect local maximum, this is done when local minimum is reached and direction is changed.
