@@ -299,7 +299,7 @@ namespace GITT_Analysis
             Double mass = 0.002707;//g DIFFERENT FOR EACH Li3 first and second run: 0.002707. Li1 first run: 3.272 mg
             Double molar_mass = 181.88;//g/mol
             Double molar_volume = 0.05413095;// molar_mass/density -> 181.88 g/mol / 3.36 g/mL -> 0.05413095 L/mol
-            Double area = 0.00007853982;//A = pi * r^2 -> pi * 0.005 m = 7.853982*10^-5 m^2
+            Double area = 0.000153938;//A = pi * r^2 -> pi * 0.005 m = 7.853982*10^-5 m^2
             //constants
             Double pi = 3.1415926;
 
