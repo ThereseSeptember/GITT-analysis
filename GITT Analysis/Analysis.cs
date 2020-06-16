@@ -111,8 +111,8 @@ namespace GITT_Analysis
                         direction = Direction.Down; //setting the direction to down, but it already is?
                         //The first measurement/local max is set manually, as the potential varies a lot within the first few seconds making it difficult to make logic, as it is not a local max. Maybe threshold can help.
                         //Dummy numbers SHOULD BE CORRECTED!!!!!
-                        tempDiffMeasurement.Es_initial = 3.39753915m; //DIFFERENT FOR EACH. Li3 first run: 3.40479m. Li3 second run: 3.242528915m. Li1: 3.39753915m
-                        tempDiffMeasurement.Et_initial = 3.3706082m; //DIFFERENT FOR EACH. Li3 first run: 3.3905m. Li3 second run: 3.20542645m. Li1: 3.3706082m
+                        tempDiffMeasurement.Es_initial = 3.40479m; //DIFFERENT FOR EACH. Li3 first run: 3.40479m. Li3 second run: 3.242528915m. Li1: 3.39753915m
+                        tempDiffMeasurement.Et_initial = 3.3905m; //DIFFERENT FOR EACH. Li3 first run: 3.3905m. Li3 second run: 3.20542645m. Li1: 3.3706082m
                         tempDiffMeasurement.Time_initial = 9.9998m; //DIFFERENT FOR EACH. Li3 first run: 9.9998m. Li3 second run: 9.9998m. Li1: 9.9998m
                         tempDiffMeasurement.Lithium_initial = 0;
                         continue;
@@ -296,7 +296,7 @@ namespace GITT_Analysis
         {
             decimal counter = 0;
             //Data needed for the calculation.
-            Double mass = 0.003272;//g DIFFERENT FOR EACH Li3 first and second run: 0.002707. Li1 first run: 3.272 mg = 0.003272
+            Double mass = 0.002707;//g DIFFERENT FOR EACH Li3 first and second run: 0.002707. Li1 first run: 3.272 mg = 0.003272
             Double molar_mass = 181.88;//g/mol
             Double molar_volume = 0.05413095;// molar_mass/density -> 181.88 g/mol / 3.36 g/mL -> 0.05413095 L/mol
             Double area = 0.000153938;//A = pi * r^2 -> pi * 0.007 m = 0.000153938 m^2
@@ -317,7 +317,7 @@ namespace GITT_Analysis
             using FileStream fs = File.Create(GITT_data_file);
             using var sr = new StreamWriter(fs);
 
-            sr.WriteLine("Diffusion coefficient" + "\t" + "Lithium");
+            sr.WriteLine("Diffusion coefficient" + "\t" + "Lithium" + "\t" + "Potential" + "\t" + "Time");
             
 
             Debug.WriteLine("Let's calculate stuff");
@@ -338,6 +338,14 @@ namespace GITT_Analysis
                 Decimal ddlith = Decimal.Divide(ddlith_sum,2);
                 Double dlith = Decimal.ToDouble(ddlith);
                 //calculate diff coef.
+
+                //calculate the time (take average)
+                Decimal datime = (diffmeasurement.Time_final + diffmeasurement.Time_initial)/2;
+                Double atime = Decimal.ToDouble(datime);
+                //calculate the potential (the average of E_t final and E_t initial)
+                Decimal dpotential = (diffmeasurement.Et_final + diffmeasurement.Et_initial)/2;
+                Double potential = Decimal.ToDouble(dpotential);
+
                 //return diff coef. and delta li.
                 counter++;
                 Debug.WriteLine(counter);
@@ -362,7 +370,7 @@ namespace GITT_Analysis
                 Double diff_coef = first_term * second_term * third_term;
                 Debug.WriteLine("Diffusion Coefficient " + diff_coef);//WORKS!
                 //Write to file
-                sr.WriteLine(diff_coef + "\t" + dlith);
+                sr.WriteLine(diff_coef + "\t" + dlith + "\t" + potential + "\t" + atime);
                                 
             }
             
