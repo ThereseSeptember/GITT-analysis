@@ -317,7 +317,7 @@ namespace GITT_Analysis
             using FileStream fs = File.Create(GITT_data_file);
             using var sr = new StreamWriter(fs);
 
-            sr.WriteLine("Diffusion coefficient" + "\t" + "Lithium" + "\t" + "Potential" + "\t" + "Time");
+            sr.WriteLine("Diffusion coefficient" + "\t" + "Lithium" + "\t" + "Potential" + "\t" + "Time" + "\t" + "E_s final");
             
 
             Debug.WriteLine("Let's calculate stuff");
@@ -357,6 +357,9 @@ namespace GITT_Analysis
                 Debug.WriteLine("time " + dtime);
                 
                 Debug.WriteLine("Lithium " + dlith);
+
+                //E_s final:
+                Double E_s_final = Decimal.ToDouble(diffmeasurement.Es_final);
                 //calculate diff. coef.
                 //First term
                 Double first_term = 4 / (pi * 600);
@@ -370,7 +373,7 @@ namespace GITT_Analysis
                 Double diff_coef = first_term * second_term * third_term;
                 Debug.WriteLine("Diffusion Coefficient " + diff_coef);//WORKS!
                 //Write to file
-                sr.WriteLine(diff_coef + "\t" + dlith + "\t" + potential + "\t" + atime);
+                sr.WriteLine(diff_coef + "\t" + dlith + "\t" + potential + "\t" + atime + "\t" + E_s_final);
                                 
             }
             
